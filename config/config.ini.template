@@ -1,0 +1,4 @@
+[DEFAULT]
+
+binance_api_key = xxx
+binance_api_secret = xxx

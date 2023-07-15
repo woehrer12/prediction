@@ -44,14 +44,12 @@ if __name__ == "__main__":
     ## Request Data
     print("Request Data")
 
-    # TODO
-    # helper.request.request_all(CurrencyPairList)
+    helper.request.request_all(CurrencyPairList)
 
     for CurrencyPair in CurrencyPairList:
         print("Prepair Data")
 
-        # TODO
-        # helper.prepair.sort_data(CurrencyPair)
+        helper.prepair.sort_data(CurrencyPair)
 
         print("Training")
 
