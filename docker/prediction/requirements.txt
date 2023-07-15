@@ -1,0 +1,10 @@
+requests
+pandas
+numpy
+python-binance
+matplotlib
+scikit-learn
+tensorflow
+tensorflow_decision_forests
+keras_tuner
+statsmodels
