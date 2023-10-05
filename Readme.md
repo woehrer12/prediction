@@ -7,4 +7,4 @@ First copy the ./config/config.ini.template to ./config/config.ini and insert yo
 Run ```./docker/prediction/compile.sh```
 
 # 3
-Run ```docker run -v ./:/mining/ prediction```
+Run ```docker run -v ./:/prediction/ prediction```

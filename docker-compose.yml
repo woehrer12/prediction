@@ -1,0 +1,13 @@
+version : '3.7'
+
+services:
+
+  hiveos:
+    image: prediction
+    container_name: prediction
+    restart: 'no'
+    volumes:
+    - ./:/prediction/
+    tty: true
+
+  

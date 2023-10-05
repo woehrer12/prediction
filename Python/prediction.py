@@ -3,6 +3,7 @@ import os
 import time
 import warnings
 import logging
+from rich import print
 
 import helper.functions
 import numpy as np
@@ -44,12 +45,12 @@ if __name__ == "__main__":
     ## Request Data
     print("Request Data")
 
-    helper.request.request_all(CurrencyPairList)
+    # helper.request.request_all(CurrencyPairList)
 
     for CurrencyPair in CurrencyPairList:
         print("Prepair Data")
 
-        helper.prepair.sort_data(CurrencyPair)
+        # helper.prepair.sort_data(CurrencyPair)
 
         print("Training")
 
