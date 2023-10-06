@@ -39,9 +39,25 @@ def compute_rsi(df, window, colname):
     df[colname].fillna(df[colname].mean(), inplace=True)
     return(df)
 
+def sort_all(CurrencyPairList):
+
+    p = multiprocessing.Pool(12)
+
+    for CurrencyPair in CurrencyPairList:
+
+        p.apply_async(helper.prepair.sort_data, args=(CurrencyPair,))
+    p.close()
+    p.join()
+
+
 def sort_data(CurrencyPair):
     df = pd.read_csv('./KI/Data/CurrencyPair_{}/Data.csv'.format(CurrencyPair))
 
+    df = sorting(df)
+
+    df.to_csv('./KI/Data/CurrencyPair_{}/Sorted.csv'.format(CurrencyPair), index=False)
+
+def sorting(df):
     # Convert the UNIX time into the date
     df["Date"] = pd.to_datetime(df["Open time"], unit='ms')
 
@@ -105,6 +121,14 @@ def sort_data(CurrencyPair):
     df['sma50'] = ta.SMA(df, timeperiod=50)
     df['sma100'] = ta.SMA(df, timeperiod=100)
 
+    # SMA Cross
+    # 1 = BUY 2 = SELL 3 = HOLD
+    df['sma3_21_cross'] = np.where((df['sma3'] > df['sma21']) & (df['sma3'].shift(1) <= df['sma21'].shift(1)), 1,
+                            np.where((df['sma3'] < df['sma21']) & (df['sma3'].shift(1) >= df['sma21'].shift(1)), 2, 3))
+
+    df['sma5_100_cross'] = np.where((df['sma5'] > df['sma100']) & (df['sma5'].shift(1) <= df['sma100'].shift(1)), 1,
+                            np.where((df['sma5'] < df['sma100']) & (df['sma5'].shift(1) >= df['sma100'].shift(1)), 2, 3))
+    
     hilbert = ta.HT_SINE(df)
     df['htsine'] = hilbert['sine']
     df['htleadsine'] = hilbert['leadsine']
@@ -216,4 +240,4 @@ def sort_data(CurrencyPair):
     # Remove na values
     df.dropna(inplace=True)
 
-    df.to_csv('./KI/Data/CurrencyPair_{}/Sorted.csv'.format(CurrencyPair), index=False)
+    return df

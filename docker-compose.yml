@@ -2,7 +2,7 @@ version : '3.7'
 
 services:
 
-  hiveos:
+  prediction:
     image: prediction
     container_name: prediction
     restart: 'no'
@@ -10,4 +10,9 @@ services:
     - ./:/prediction/
     tty: true
 
-  
+  time-based-routine:
+    image: time-based-routine
+    container_name: time-based-routine
+    restart: 'unless-stopped'
+    volumes:
+    - ./:/prediction/

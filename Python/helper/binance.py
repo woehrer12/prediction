@@ -64,6 +64,9 @@ def get_klines_1h(symbol):
 def get_klines_15m(symbol):
     return client.get_klines(symbol = symbol, interval = Client.KLINE_INTERVAL_15MINUTE)
 
+def get_klines_5m(symbol):
+    return client.get_klines(symbol = symbol, interval = Client.KLINE_INTERVAL_5MINUTE)
+
 def get_historical_klines_1h(symbol):
     return client.get_historical_klines(symbol, Client.KLINE_INTERVAL_1HOUR,"1 Jan, 2017")
 

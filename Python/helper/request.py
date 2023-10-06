@@ -3,9 +3,6 @@ import logging
 import os
 import time
 import multiprocessing
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 
 
 import helper.binance
@@ -29,12 +26,12 @@ def pairs():
 
 def request_all(CurrencyPairList):
 
-    p = multiprocessing.Pool(4)
+    p = multiprocessing.Pool(8)
 
     for CurrencyPair in CurrencyPairList:
 
         p.apply_async(helper.request.request, args=(CurrencyPair,))
-        time.sleep(10)
+        time.sleep(30)
     p.close()
     p.join()
 

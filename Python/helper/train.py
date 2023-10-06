@@ -154,7 +154,7 @@ def train(CurrencyPair):
     X = df.drop("Prediction", axis=1)  # Features sind alle Spalten außer "Weighted_Price"
     Y = df["Prediction"]  # Ziel ist die Spalte "Weighted_Price"
 
-    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, random_state=42, train_size=0.8, test_size=0.2)
+    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, random_state=42, train_size=0.8, test_size=0.2, shuffle=False)
 
     model_path = "./KI/Predict/CurrencyPair_{}/model.h5".format(CurrencyPair)
 

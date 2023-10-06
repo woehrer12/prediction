@@ -20,9 +20,9 @@ RUN pip install TA-Lib
 
 # Python Requirements
 
-COPY requirements.txt ./
+COPY ./requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 WORKDIR /prediction
 
-CMD [ "python", "-u", "/prediction/Python/prediction.py" ]
+CMD [ "python", "-u", "/prediction/Python/time-based-routine.py" ]
