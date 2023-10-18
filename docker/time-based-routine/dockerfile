@@ -1,0 +1,28 @@
+FROM python:3.11
+
+ENV TERM=xterm
+
+# TA-Lib
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends build-essential gcc wget
+
+
+# TA-Lib
+RUN wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz && \
+  tar -xvzf ta-lib-0.4.0-src.tar.gz && \
+  cd ta-lib/ && \
+  ./configure --prefix=/usr && \
+  make && \
+  make install
+
+RUN pip install TA-Lib
+# RUN rm -R ta-lib ta-lib-0.4.0-src.tar.gz
+
+# Python Requirements
+
+COPY ./requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+WORKDIR /prediction
+
+CMD [ "python", "-u", "/prediction/Python/time-based-routine.py" ]

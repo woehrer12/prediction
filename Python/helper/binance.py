@@ -58,11 +58,20 @@ def market_buy(symbol, quantity):
 def market_sell(symbol, quantity):
     return client.order_market_sell(symbol=symbol, quantity=quantity)
 
+def get_klines_1d(symbol):
+    return client.get_klines(symbol = symbol, interval = Client.KLINE_INTERVAL_1DAY)
+
+def get_klines_6h(symbol):
+    return client.get_klines(symbol = symbol, interval = Client.KLINE_INTERVAL_6HOUR)
+
 def get_klines_1h(symbol):
     return client.get_klines(symbol = symbol, interval = Client.KLINE_INTERVAL_1HOUR)
 
 def get_klines_15m(symbol):
     return client.get_klines(symbol = symbol, interval = Client.KLINE_INTERVAL_15MINUTE)
+
+def get_klines_5m(symbol):
+    return client.get_klines(symbol = symbol, interval = Client.KLINE_INTERVAL_5MINUTE)
 
 def get_historical_klines_1h(symbol):
     return client.get_historical_klines(symbol, Client.KLINE_INTERVAL_1HOUR,"1 Jan, 2017")

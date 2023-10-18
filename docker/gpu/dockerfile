@@ -1,0 +1,29 @@
+FROM ubuntu:20.04
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get -y upgrade \
+  && apt-get install -y \
+    initramfs-tools \
+    apt-utils \
+    unzip \
+    tar \
+    curl \
+    xz-utils \
+    ocl-icd-libopencl1 \
+    opencl-headers \
+    clinfo \
+    ;
+
+ARG AMD_DRIVER=amdgpu-pro-21.10-1247438-ubuntu-20.04.tar.xz
+ARG AMD_DRIVER_URL=https://drivers.amd.com/drivers/linux
+RUN mkdir -p /tmp/opencl-driver-amd
+WORKDIR /tmp/opencl-driver-amd
+RUN curl --referer $AMD_DRIVER_URL -O $AMD_DRIVER_URL/$AMD_DRIVER; \
+    tar -Jxvf $AMD_DRIVER; \
+    cd amdgpu-pro-*; \
+    ./amdgpu-install --opencl=legacy,rocr --headless --no-dkms -y; \
+    rm -rf /tmp/opencl-driver-amd;
+
+RUN mkdir -p /etc/OpenCL/vendors && \
+    echo "libamdocl64.so" > /etc/OpenCL/vendors/amdocl64.icd
+RUN ln -s /usr/lib/x86_64-linux-gnu/libOpenCL.so.1 /usr/lib/libOpenCL.so
+WORKDIR /

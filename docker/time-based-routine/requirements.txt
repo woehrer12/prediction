@@ -1,0 +1,14 @@
+requests
+pandas
+numpy
+python-binance == 1.0.17
+joblib
+schedule
+matplotlib
+seaborn
+statsmodels
+keras
+scikit-learn
+tensorflow
+scikeras
+python-telegram-bot >= 20.0

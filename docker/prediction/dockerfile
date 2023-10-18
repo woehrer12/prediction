@@ -1,10 +1,22 @@
-FROM python:3
+FROM python:3.11
 
 ENV TERM=xterm
 
-# TA-Lib
 RUN apt-get update
-RUN apt-get install -y --no-install-recommends build-essential gcc wget
+RUN apt-get upgrade -y
+RUN apt-get dist-upgrade -y
+RUN apt-get install -y --no-install-recommends build-essential gcc wget libnuma-dev
+
+
+
+# # GPU
+# RUN apt-get install -y --no-install-recommends libnuma-dev
+# RUN wget -q -O - https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add -
+# RUN echo 'deb http://repo.radeon.com/rocm/apt/latest/dists/ubuntu/' | tee /etc/apt/sources.list.d/rocm.list
+# RUN apt-get update
+# RUN apt-get install rocm-dkms
+# RUN usermod -a -G video $LOGNAME
+# RUN usermod -a -G render $LOGNAME
 
 
 # TA-Lib

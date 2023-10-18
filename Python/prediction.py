@@ -1,9 +1,6 @@
-import multiprocessing
 import os
-import time
 import warnings
 import logging
-from rich import print
 
 import helper.functions
 import numpy as np
@@ -36,22 +33,25 @@ if __name__ == "__main__":
     ## Search Pairs
     print("Search Pairs")
 
-    # CurrencyPairList = helper.predict.pairs()
+    # CurrencyPairList = helper.request.pairs()
 
-    CurrencyPairList = ["BTCBUSD"] #TODO overwrite the List von Exchange
+    CurrencyPairList = ["BTCUSDT"] # TODO overwrite the List von Exchange
 
 
 
     ## Request Data
     print("Request Data")
 
-    # helper.request.request_all(CurrencyPairList)
+    # helper.request.request_all(CurrencyPairList) # TODO
+
+
+    ## Prepair Data
+
+    # print("Prepair Data")
+
+    # helper.prepair.sort_all(CurrencyPairList)
 
     for CurrencyPair in CurrencyPairList:
-        print("Prepair Data")
-
-        # helper.prepair.sort_data(CurrencyPair)
-
         print("Training")
 
         helper.train.train(CurrencyPair)
