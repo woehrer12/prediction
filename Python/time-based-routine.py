@@ -10,8 +10,6 @@ logger = helper.functions.initlogger("time-based-routine.log")
 
 warnings.filterwarnings('ignore')
 
-conf = helper.config.initconfig()
-
 # Schedule alle 6 Stunden
 
 # schedule.every().hour.at(":00").do(helper.time_checks.check_5m)
