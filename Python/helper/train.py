@@ -2,11 +2,13 @@ import pandas as pd
 import numpy as np
 import os
 import multiprocessing
-from rich import print
 import random
+import datetime
+import logging
+
+import tensorflow as tf
 
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.model_selection import GridSearchCV
 from tensorflow import keras
 from tensorflow.keras.layers import Dense, LSTM, Dropout, Flatten, Reshape
 from tensorflow.keras import Sequential
@@ -33,23 +35,36 @@ def split_in_batches(df):
     # Anzahl der Datensätze im DataFrame
     total_records = len(df)
 
-    # Größe jedes Pakets
-    batch_size = 1000
-
     # Liste zum Speichern der aufgeteilten Pakete
     data_batches = []
 
-    # Mische die Daten
-    # df = df.sample(frac=1, random_state=42)  # Shuffle mit zufälligem Seed für Reproduzierbarkeit
+    # Größe jedes Pakets
+    batch_size = 100
 
     # Schleife zum Aufteilen des DataFrames in Pakete
-    for i in range(0, total_records, batch_size):
+    for i in range(0, total_records, int(batch_size*0.1)):
         data_batch = df[i:i+batch_size]
         data_batches.append(data_batch)
 
+    # Größe jedes Pakets
+    batch_size = 1000
+
+    # Schleife zum Aufteilen des DataFrames in Pakete
+    for i in range(0, total_records, int(batch_size*0.1)):
+        data_batch = df[i:i+batch_size]
+        data_batches.append(data_batch)
+
+    # Größe jedes Pakets
+    batch_size = 10000
+
+    # Schleife zum Aufteilen des DataFrames in Pakete
+    for i in range(0, total_records, int(batch_size*0.1)):
+        data_batch = df[i:i+batch_size]
+        data_batches.append(data_batch)
+
+
     # Mische die aufgeteilten Batches zufällig
     random.shuffle(data_batches)
-
     
     return data_batches
 
@@ -79,6 +94,18 @@ def create_model1(X_train):
     # model.summary()
 
     return model
+
+def plot_predict(CurrencyPair, Y, Y_pred):
+    plt.figure(figsize=(12, 6))
+    plt.plot(Y, label='True')
+    plt.plot(Y_pred, label='Predicted')
+    plt.title('Vorhersagen des Modells')
+    plt.xlabel('Index')
+    plt.ylabel(CurrencyPair)
+    plt.legend()
+    # Speichern des Plots in einer Datei
+    plt.savefig('./KI/Predict/CurrencyPair_{}/prediction_live.png'.format(CurrencyPair))
+
 
 def plot(CurrencyPair, round_number, Y_train, Y_pred, Y_test, test_acc, test_loss):
 
@@ -133,8 +160,10 @@ def plot(CurrencyPair, round_number, Y_train, Y_pred, Y_test, test_acc, test_los
     plt.text(0.5, 0.75, f'R2: {r2}', transform=plt.gca().transAxes, 
             fontsize=12, va='top', ha='left')
 
+    timestamp = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M")
+
     # Speichern des Plots in einer Datei
-    plt.savefig('./KI/Predict/CurrencyPair_{}/prediction_plot_{}.png'.format(CurrencyPair, round_number))
+    plt.savefig('./KI/Predict/CurrencyPair_{}/prediction_plot_{}.png'.format(CurrencyPair, timestamp))
 
 
 def train(CurrencyPair):
@@ -151,10 +180,12 @@ def train(CurrencyPair):
     ## Model creation
 
     # Einmaliges einlesen der Daten um die Form bekannt zu machen
-    X = df.drop("Prediction", axis=1)  # Features sind alle Spalten außer "Weighted_Price"
+    X = df.drop("Prediction", axis=1)  # Features sind alle Spalten außer "Prediction"
+    X = X.drop("Open time", axis=1)
+    X = X.drop("Close time", axis=1)
     Y = df["Prediction"]  # Ziel ist die Spalte "Weighted_Price"
 
-    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, random_state=42, train_size=0.8, test_size=0.2, shuffle=False)
+    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, train_size=0.8, test_size=0.2, shuffle=False)
 
     model_path = "./KI/Predict/CurrencyPair_{}/model.h5".format(CurrencyPair)
 
@@ -178,6 +209,8 @@ def train(CurrencyPair):
 
         # Aufteilung in Features (X) und Ziel (Y)
         X = data.drop("Prediction", axis=1)  # Features sind alle Spalten außer "Prediction"
+        X = X.drop("Open time", axis=1)
+        X = X.drop("Close time", axis=1)
         Y = data["Prediction"]  # Ziel ist die Spalte "Weighted_Price"
 
         volatilität_prozent = (Y.std() / Y.mean()) * 100
@@ -186,9 +219,9 @@ def train(CurrencyPair):
 
         if volatilität_prozent > 3.0:
 
-            # Feature Scaling - Normalisierung der Daten
-            scaler = MinMaxScaler()
-            X = scaler.fit_transform(X)
+            # # Feature Scaling - Normalisierung der Daten
+            # scaler = MinMaxScaler()
+            # X = scaler.fit_transform(X)
 
             # Aufteilung in Trainings- und Testdatensätze
             X_train, X_test, Y_train, Y_test = train_test_split(X, Y, random_state=0, train_size=0.8, test_size=0.2, shuffle= False)
@@ -196,7 +229,7 @@ def train(CurrencyPair):
             # EarlyStopping
             custom_early_stopping = EarlyStopping(
                 monitor='loss', 
-                patience=1000, 
+                patience=200, 
                 min_delta=1, 
                 mode='min'
             )
@@ -206,11 +239,11 @@ def train(CurrencyPair):
             # fit the model to the training data
             model.fit(  X_train, 
                         Y_train, 
-                        epochs=1000, 
+                        epochs=2000, 
                         batch_size=1024, 
                         callbacks=[custom_early_stopping], 
                         shuffle=False, 
-                        verbose=1,
+                        verbose=2,
                         workers=num_cpus,  # Verwenden Sie die Anzahl der verfügbaren CPUs
                         use_multiprocessing=True  # Aktivieren Sie die multiprocessing-Unterstützung)
                     )
@@ -230,3 +263,29 @@ def train(CurrencyPair):
             model.save("./KI/Predict/CurrencyPair_{}/model.h5".format(CurrencyPair))
 
         round_number = round_number + 1
+
+def predict(CurrencyPair, data):
+
+    model_path = "./KI/Predict/CurrencyPair_{}/model.h5".format(CurrencyPair)
+
+    if os.path.exists(model_path):
+        model = keras.models.load_model(model_path)
+        print("Das Modell wurde geladen.")
+    else:
+        logging.info("Das Modell existiert nicht und muss trainiert oder erstellt werden.")
+        return
+    
+    # Aufteilung in Features (X) und Ziel (Y)
+    X = data.drop("Prediction", axis=1)  # Features sind alle Spalten außer "Prediction"
+    X = X.drop("Open time", axis=1)
+    X = X.drop("Close time", axis=1)
+    Y = data["Prediction"]  # Ziel ist die Spalte "Weighted_Price"
+
+    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, train_size=0.01, test_size=0.99, shuffle= False)
+
+    print(X)
+
+    # Vorhersagen auf den Testdaten
+    Y_pred = model.predict(X_test)
+
+    plot_predict(CurrencyPair, Y, Y_pred)

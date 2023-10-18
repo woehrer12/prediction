@@ -9,3 +9,6 @@ seaborn
 statsmodels
 keras
 scikit-learn
+tensorflow
+scikeras
+python-telegram-bot >= 20.0

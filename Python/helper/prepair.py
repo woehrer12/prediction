@@ -57,7 +57,7 @@ def sort_data(CurrencyPair):
 
     df.to_csv('./KI/Data/CurrencyPair_{}/Sorted.csv'.format(CurrencyPair), index=False)
 
-def sorting(df):
+def sorting(df, predict = True):
     # Convert the UNIX time into the date
     df["Date"] = pd.to_datetime(df["Open time"], unit='ms')
 
@@ -65,7 +65,7 @@ def sorting(df):
     df['dayofweek'] = df['Date'].dt.dayofweek
     df['quarter'] = df['Date'].dt.quarter
     df['month'] = df['Date'].dt.month
-    df['year'] = df['Date'].dt.year
+#     df['year'] = df['Date'].dt.year
     df['dayofyear'] = df['Date'].dt.dayofyear
     df['dayofmonth'] = df['Date'].dt.day
 
@@ -113,6 +113,15 @@ def sorting(df):
     df['ema50'] = ta.EMA(df, timeperiod=50)
     df['ema100'] = ta.EMA(df, timeperiod=100)
 
+    # EMA Cross
+    # 1 = BUY 2 = SELL 3 = HOLD
+    df['ema3_21_cross'] = np.where((df['ema3'] > df['ema21']) & (df['ema3'].shift(1) <= df['ema21'].shift(1)), 1,
+                            np.where((df['ema3'] < df['ema21']) & (df['ema3'].shift(1) >= df['ema21'].shift(1)), 2, 3))
+
+    df['ema5_100_cross'] = np.where((df['ema5'] > df['ema100']) & (df['ema5'].shift(1) <= df['ema100'].shift(1)), 1,
+                            np.where((df['ema5'] < df['ema100']) & (df['ema5'].shift(1) >= df['ema100'].shift(1)), 2, 3))
+    
+
     # SMA - Simple Moving Average
     df['sma3'] = ta.SMA(df, timeperiod=3)
     df['sma5'] = ta.SMA(df, timeperiod=5)
@@ -132,6 +141,22 @@ def sorting(df):
     hilbert = ta.HT_SINE(df)
     df['htsine'] = hilbert['sine']
     df['htleadsine'] = hilbert['leadsine']
+
+    # Parameter für Bollinger-Bänder
+    N = 20  # Fenstergröße für den gleitenden Durchschnitt
+    K = 2   # Faktor für die Standardabweichung
+
+    # Berechnen Sie den gleitenden Durchschnitt (Mittlere Bollinger-Band)
+    df['Middle_Band_BB'] = df['close'].rolling(window=N).mean()
+
+    # Berechnen Sie die Standardabweichung
+    df['Std_BB'] = df['close'].rolling(window=N).std()
+
+    # Berechnen Sie die obere Bollinger-Bandlinie
+    df['Upper_Band_BB'] = df['Middle_Band_BB'] + (K * df['Std_BB'])
+
+    # Berechnen Sie die untere Bollinger-Bandlinie
+    df['Lower_Band_BB'] = df['Middle_Band_BB'] - (K * df['Std_BB'])
 
     # TODO Add more indicators
     df['adx'] = ta.ADX(df)
@@ -231,11 +256,17 @@ def sorting(df):
     df["MACD"], df["MACD_SIGNAL"], df["MACD_HIST"] = ta.MACD(df["close"], fastperiod=12, slowperiod=26, signalperiod=9)
 
 
+    # ATR - Average True Range
+    atr_period = 14  # Anpassen Sie den Zeitraum nach Bedarf
+    df['atr'] = ta.ATR(df['high'], df['low'], df['close'], timeperiod=atr_period)
+
+
     # Definieren der Schwellenwerte für den Anstieg
     threshold_up = 1.05  # 5% Anstieg
 
-    # Berechnen des Anstiegs basierend auf der "close"
-    df["Prediction"] = df["close"].shift(-100)
+    if predict == True:
+        # Berechnen des Anstiegs basierend auf der "close"
+        df["Prediction"] = df["close"].shift(-100)
 
     # Remove na values
     df.dropna(inplace=True)
