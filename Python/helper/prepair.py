@@ -112,14 +112,18 @@ def sorting(df, predict = True):
     df['ema21'] = ta.EMA(df, timeperiod=21)
     df['ema50'] = ta.EMA(df, timeperiod=50)
     df['ema100'] = ta.EMA(df, timeperiod=100)
+    df['ema150'] = ta.EMA(df, timeperiod=150)
 
     # EMA Cross
     # 1 = BUY 2 = SELL 3 = HOLD
-    df['ema3_21_cross'] = np.where((df['ema3'] > df['ema21']) & (df['ema3'].shift(1) <= df['ema21'].shift(1)), 1,
-                            np.where((df['ema3'] < df['ema21']) & (df['ema3'].shift(1) >= df['ema21'].shift(1)), 2, 3))
+    df['ema50_100_cross'] = np.where((df['ema50'] > df['ema100']) & (df['ema50'].shift(1) <= df['ema100'].shift(1)), 1,
+                            np.where((df['ema50'] < df['ema100']) & (df['ema50'].shift(1) >= df['ema100'].shift(1)), 2, 3))
 
-    df['ema5_100_cross'] = np.where((df['ema5'] > df['ema100']) & (df['ema5'].shift(1) <= df['ema100'].shift(1)), 1,
-                            np.where((df['ema5'] < df['ema100']) & (df['ema5'].shift(1) >= df['ema100'].shift(1)), 2, 3))
+    df['ema50_150_cross'] = np.where((df['ema50'] > df['ema150']) & (df['ema50'].shift(1) <= df['ema150'].shift(1)), 1,
+                            np.where((df['ema50'] < df['ema150']) & (df['ema50'].shift(1) >= df['ema150'].shift(1)), 2, 3))
+    
+    df['ema100_150_cross'] = np.where((df['ema100'] > df['ema150']) & (df['ema100'].shift(1) <= df['ema150'].shift(1)), 1,
+                            np.where((df['ema100'] < df['ema150']) & (df['ema100'].shift(1) >= df['ema150'].shift(1)), 2, 3))
     
 
     # SMA - Simple Moving Average
@@ -129,14 +133,18 @@ def sorting(df, predict = True):
     df['sma21'] = ta.SMA(df, timeperiod=21)
     df['sma50'] = ta.SMA(df, timeperiod=50)
     df['sma100'] = ta.SMA(df, timeperiod=100)
+    df['sma150'] = ta.SMA(df, timeperiod=150)
 
     # SMA Cross
     # 1 = BUY 2 = SELL 3 = HOLD
-    df['sma3_21_cross'] = np.where((df['sma3'] > df['sma21']) & (df['sma3'].shift(1) <= df['sma21'].shift(1)), 1,
-                            np.where((df['sma3'] < df['sma21']) & (df['sma3'].shift(1) >= df['sma21'].shift(1)), 2, 3))
+    df['sma50_100_cross'] = np.where((df['sma50'] > df['sma100']) & (df['sma50'].shift(1) <= df['sma100'].shift(1)), 1,
+                            np.where((df['sma50'] < df['sma100']) & (df['sma50'].shift(1) >= df['sma100'].shift(1)), 2, 3))
 
-    df['sma5_100_cross'] = np.where((df['sma5'] > df['sma100']) & (df['sma5'].shift(1) <= df['sma100'].shift(1)), 1,
-                            np.where((df['sma5'] < df['sma100']) & (df['sma5'].shift(1) >= df['sma100'].shift(1)), 2, 3))
+    df['sma50_150_cross'] = np.where((df['sma50'] > df['sma150']) & (df['sma50'].shift(1) <= df['sma150'].shift(1)), 1,
+                            np.where((df['sma50'] < df['sma150']) & (df['sma50'].shift(1) >= df['sma150'].shift(1)), 2, 3))
+    
+    df['sma100_150_cross'] = np.where((df['sma100'] > df['sma150']) & (df['sma100'].shift(1) <= df['sma150'].shift(1)), 1,
+                            np.where((df['sma100'] < df['sma150']) & (df['sma100'].shift(1) >= df['sma150'].shift(1)), 2, 3))
     
     hilbert = ta.HT_SINE(df)
     df['htsine'] = hilbert['sine']
@@ -258,7 +266,12 @@ def sorting(df, predict = True):
 
     # ATR - Average True Range
     atr_period = 14  # Anpassen Sie den Zeitraum nach Bedarf
+    factor = 3
+
     df['atr'] = ta.ATR(df['high'], df['low'], df['close'], timeperiod=atr_period)
+    df['basic'] = (df['high'] + df['low']) / 2
+    df['basic_ub'] = df['basic'] + factor * df['atr']
+    df['basic_lb'] = df['basic'] - factor * df['atr']
 
 
     # Definieren der Schwellenwerte für den Anstieg

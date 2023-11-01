@@ -7,6 +7,9 @@ import helper.telegramsend
 import time
 import datetime
 import logging
+import os
+
+import matplotlib.pyplot as plt
 
 import pandas as pd
 
@@ -16,6 +19,7 @@ CurrencyPairList = ['BTCUSDT',
                     'AAVEUSDT', 
                     'ADAUSDT', 
                     'APEUSDT',
+                    'APTUSDT',
                     'ARBUSDT',
                     'ATOMUSDT',
                     'AVAXUSDT',
@@ -23,25 +27,96 @@ CurrencyPairList = ['BTCUSDT',
                     'DOGEUSDT',
                     'DOTUSDT',
                     'EGLDUSDT',
+                    'EOSUSDT',
+                    'ETCUSDT',
+                    'HBARUSDT',
+                    'HOTUSDT',
                     'ICPUSDT',
                     'IMXUSDT',
+                    'INJUSDT',
                     'KEYUSDT',
+                    'LDOUSDT',
                     'LINKUSDT',
+                    'LOOMUSDT',
                     'LTCUSDT',
                     'MATICUSDT',
+                    'MINAUSDT',
+                    'OPUSDT',
                     #'PEPEUSDT',
                     'RNDRUSDT',
+                    'RUNEUSDT',
+                    'SHIBUSDT',
                     'SNXUSDT',
                     'SOLUSDT',
                     'STORJUSDT',
+                    'STXUSDT',
                     'SUIUSDT',
+                    # 'TONUSDT',
+                    'TRBUSDT',
                     'TRXUSDT',
+                    'UMAUSDT',
+                    'UNIUSDT',
+                    'VETUSDT',
                     'WOOUSDT',
                     'XLMUSDT',
                     'XMRUSDT',
                     'XRPUSDT',
                     ]
 
+
+def plot(df, CurrencyPair, timeframe):
+
+    ## Create Data Folder
+    if not os.path.exists('./plots'):
+        os.makedirs('./plots')
+
+    # Annahme: Sie haben bereits einen DataFrame 'df' mit den notwendigen Daten und Indikatoren erstellt.
+
+    # Erstellen Sie eine Figur und Achsen für den Plot
+    fig, ax1 = plt.subplots()
+
+    # Achse 1: Kursverlauf
+    ax1.set_xlabel('Datum')
+    ax1.set_ylabel('Kurs', color='tab:blue')
+    ax1.plot(df['Open time'], df['close'], color='tab:blue', label='Kurs')
+    ax1.set_xticklabels(pd.to_datetime(df['Open time'], unit='ms'), rotation=45)
+    ax1.tick_params(axis='y', labelcolor='tab:blue')
+
+    # Erstellen Sie eine zweite Achse für die Indikatoren
+    ax2 = ax1.twinx()
+
+    # RSI
+    ax2.plot(df['Open time'], df['rsi'], color='green', label='RSI')
+    ax2.fill_between(df['Open time'], 20, 80, color='green', alpha=0.1)  # Hervorheben von überkauften und überverkauften Bereichen
+
+    # EMA
+    ax1.plot(df['Open time'], df['ema50'], color='red', label='EMA 50')
+
+    ax1.plot(df['Open time'], df['ema100'], color='orange', label='EMA 100')
+
+    ax1.plot(df['Open time'], df['ema150'], color='green', label='EMA 150')
+
+    # # MACD
+    # ax2.plot(df['Open time'], df['macd'] - df['macdsignal'], color='purple', label='MACD Histogram')
+
+    # # Stochastic
+    # ax2.plot(df['Open time'], df['fastk'] - df['fastd'], color='brown', label='Stochastic Fast K-D')
+    # ax2.plot(df['Open time'], df['slowk'] - df['slowd'], color='cyan', label='Stochastic Slow K-D')
+
+    # Bollinger Bands
+    ax1.plot(df['Open time'], df['Upper_Band_BB'], color='magenta', label='Upper Bollinger Band')
+    ax1.plot(df['Open time'], df['Lower_Band_BB'], color='gray', label='Lower Bollinger Band')
+
+    # Legende
+    ax1.legend(loc='upper left', fontsize='small')
+    ax2.legend(loc='lower left', fontsize='small')
+
+    # Titel und Beschriftungen
+    plt.title(CurrencyPair + " " + timeframe)
+    plt.xlabel('Datum')
+
+    # Anzeigen des Plots
+    plt.savefig('./plots/CurrencyPair_{}_{}.png'.format(CurrencyPair, timeframe))
 
 def checks(data, CurrencyPair,timeframe):
 
@@ -60,7 +135,7 @@ def checks(data, CurrencyPair,timeframe):
 
         ## RSI
 
-        if df['rsi'].iloc[-1] < 20:        
+        if df['rsi'].iloc[-1] < 20 and df['rsi'].iloc[-1] > 1:        
             text = text + "RSI: " + str(df['rsi'].iloc[-1]) + " 🟢 \n"
             BUY += 1
 
@@ -75,20 +150,28 @@ def checks(data, CurrencyPair,timeframe):
         SMA_BUY = 0
         SMA_SELL = 0
 
-        if df['sma3_21_cross'].iloc[-1] == 1:
-            text = text + "SMA 3_21 cross  🟢 \n"
+        if df['sma50_100_cross'].iloc[-1] == 1:
+            text = text + "SMA 50_100 cross  🟢 \n"
             SMA_BUY += 1
 
-        if df['sma3_21_cross'].iloc[-1] == 2:
-            text = text + "SMA 3_21 cross  🔴 \n"
+        if df['sma50_100_cross'].iloc[-1] == 2:
+            text = text + "SMA 50_100 cross  🔴 \n"
             SMA_SELL += 1
 
-        if df['sma5_100_cross'].iloc[-1] == 1:
-            text = text + "SMA 5_100 cross  🟢 \n"
+        if df['sma50_150_cross'].iloc[-1] == 1:
+            text = text + "SMA 50_150 cross  🟢 \n"
             SMA_BUY += 1
 
-        if df['sma5_100_cross'].iloc[-1] == 2:
-            text = text + "SMA 3_21 cross  🔴 \n"
+        if df['sma50_150_cross'].iloc[-1] == 2:
+            text = text + "SMA 50_150 cross  🔴 \n"
+            SMA_SELL += 1
+
+        if df['sma100_150_cross'].iloc[-1] == 1:
+            text = text + "SMA 100_150 cross  🟢 \n"
+            SMA_BUY += 1
+
+        if df['sma100_150_cross'].iloc[-1] == 2:
+            text = text + "SMA 100_150 cross  🔴 \n"
             SMA_SELL += 1
 
 
@@ -107,21 +190,30 @@ def checks(data, CurrencyPair,timeframe):
         EMA_BUY = 0
         EMA_SELL = 0
 
-        if df['ema3_21_cross'].iloc[-1] == 1:
-            text = text + "EMA 3_21 cross  🟢 \n"
+        if df['ema50_100_cross'].iloc[-1] == 1:
+            text = text + "EMA 50_100 cross  🟢 \n"
             EMA_BUY += 1
 
-        if df['ema3_21_cross'].iloc[-1] == 2:
-            text = text + "EMA 3_21 cross  🔴 \n"
+        if df['ema50_100_cross'].iloc[-1] == 2:
+            text = text + "EMA 50_100 cross  🔴 \n"
             EMA_SELL += 1
 
-        if df['ema5_100_cross'].iloc[-1] == 1:
-            text = text + "EMA 5_100 cross  🟢 \n"
+        if df['ema50_150_cross'].iloc[-1] == 1:
+            text = text + "EMA 50_150 cross  🟢 \n"
             EMA_BUY += 1
 
-        if df['ema5_100_cross'].iloc[-1] == 2:
-            text = text + "EMA 3_21 cross  🔴 \n"
+        if df['ema50_150_cross'].iloc[-1] == 2:
+            text = text + "EMA 50_150 cross  🔴 \n"
             EMA_SELL += 1
+
+        if df['ema100_150_cross'].iloc[-1] == 1:
+            text = text + "EMA 100_150 cross  🟢 \n"
+            EMA_BUY += 1
+
+        if df['ema100_150_cross'].iloc[-1] == 2:
+            text = text + "EMA 100_150 cross  🔴 \n"
+            EMA_SELL += 1
+
 
 
         if EMA_BUY > EMA_SELL:
@@ -204,12 +296,24 @@ def checks(data, CurrencyPair,timeframe):
             SELL += 1
 
 
+
+        ## Supertrend
+
+        if df['close'].iloc[-1] > df['basic_ub'].iloc[-1]:
+            text = text + "Supertrend 🟢 \n"
+            BUY += 1
+
+        if df['close'].iloc[-1] < df['basic_lb'].iloc[-1]:
+            text = text + "Supertrend 🔴 \n"
+            SELL +=1
+
+
         ## Prediction TODO
 
         # helper.train.predict(CurrencyPair, df)
 
         if BUY > SELL:
-            if BUY >= 3:
+            if BUY >= 4:
                 time_now = ((int(time.time())*1000))
 
                 # Punkt 2: Volatilität basiert - ATR Multiplikator
@@ -230,8 +334,11 @@ def checks(data, CurrencyPair,timeframe):
                 print("Aktuelle Zeit: " + str(datetime.datetime.fromtimestamp(time_now/1000)))
                 print(text)
                 helper.telegramsend.send(text)
+
+                plot(df, CurrencyPair, timeframe)
+
         else:
-            if SELL >= 3:
+            if SELL >= 4:
                 time_now = ((int(time.time())*1000))
 
                 # Punkt 2: Volatilität basiert - ATR Multiplikator
@@ -253,6 +360,8 @@ def checks(data, CurrencyPair,timeframe):
 
                 helper.telegramsend.send(text)
 
+                plot(df, CurrencyPair, timeframe)
+
     
     except Exception as e:
         logging.error("Error while checks " + CurrencyPair + ": " + str(e))
@@ -265,10 +374,14 @@ def check_5m():
     # CurrencyPairList = helper.request.pairs()
 
     for CurrencyPair in CurrencyPairList:
+        try:
+            data = helper.binance.get_klines_5m(CurrencyPair)
+            
+            checks(data, CurrencyPair, timeframe)
+        except Exception as e:
+            logging.error("Error while 5m check " + CurrencyPair + ": " + str(e))
+            print("Error while 5m check " + CurrencyPair + ": " + str(e))
 
-        data = helper.binance.get_klines_5m(CurrencyPair)
-        
-        checks(data, CurrencyPair, timeframe)
 
 
 def check_15m():
@@ -278,9 +391,14 @@ def check_15m():
 
     for CurrencyPair in CurrencyPairList:
 
-        data = helper.binance.get_klines_15m(CurrencyPair)
-        
-        checks(data, CurrencyPair, timeframe)
+        try:
+            data = helper.binance.get_klines_15m(CurrencyPair)
+            
+            checks(data, CurrencyPair, timeframe)
+
+        except Exception as e:
+            logging.error("Error while 15m check " + CurrencyPair + ": " + str(e))
+            print("Error while 15m check " + CurrencyPair + ": " + str(e))
 
 
 def check_1h():
@@ -290,9 +408,14 @@ def check_1h():
 
     for CurrencyPair in CurrencyPairList:
 
-        data = helper.binance.get_klines_1h(CurrencyPair)
-        
-        checks(data, CurrencyPair, timeframe)
+        try:
+            data = helper.binance.get_klines_1h(CurrencyPair)
+            
+            checks(data, CurrencyPair, timeframe)
+
+        except Exception as e:
+            logging.error("Error while 1h check " + CurrencyPair + ": " + str(e))
+            print("Error while 1h check " + CurrencyPair + ": " + str(e))
 
 
 def check_6h():
@@ -302,9 +425,13 @@ def check_6h():
 
     for CurrencyPair in CurrencyPairList:
 
-        data = helper.binance.get_klines_6h(CurrencyPair)
-        
-        checks(data, CurrencyPair, timeframe)
+        try:
+            data = helper.binance.get_klines_6h(CurrencyPair)
+            
+            checks(data, CurrencyPair, timeframe)
+        except Exception as e:
+            logging.error("Error while 6h check " + CurrencyPair + ": " + str(e))
+            print("Error while 6h check " + CurrencyPair + ": " + str(e))
 
 
 def check_1d():
@@ -314,6 +441,10 @@ def check_1d():
 
     for CurrencyPair in CurrencyPairList:
 
-        data = helper.binance.get_klines_1d(CurrencyPair)
-        
-        checks(data, CurrencyPair, timeframe)
+        try:
+            data = helper.binance.get_klines_1d(CurrencyPair)
+            
+            checks(data, CurrencyPair, timeframe)
+        except Exception as e:
+            logging.error("Error while 1d check " + CurrencyPair + ": " + str(e))
+            print("Error while 1d check " + CurrencyPair + ": " + str(e))
