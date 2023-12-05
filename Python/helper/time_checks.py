@@ -315,7 +315,7 @@ def checks(data, CurrencyPair,timeframe):
         # helper.train.predict(CurrencyPair, df)
 
         if BUY > SELL:
-            if BUY >= 4:
+            if BUY >= 3:
                 time_now = ((int(time.time())*1000))
 
                 # Punkt 2: Volatilität basiert - ATR Multiplikator
@@ -340,7 +340,7 @@ def checks(data, CurrencyPair,timeframe):
                 plot(df, CurrencyPair, timeframe)
 
         else:
-            if SELL >= 4:
+            if SELL >= 3:
                 time_now = ((int(time.time())*1000))
 
                 # Punkt 2: Volatilität basiert - ATR Multiplikator
