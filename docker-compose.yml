@@ -2,13 +2,13 @@ version : '3.7'
 
 services:
 
-  prediction:
-    image: prediction
-    container_name: prediction
-    restart: 'no'
-    volumes:
-    - ./:/prediction/
-    tty: true
+  # prediction:
+  #   image: prediction
+  #   container_name: prediction
+  #   restart: 'no'
+  #   volumes:
+  #   - ./:/prediction/
+  #   tty: true
 
   time-based-routine:
     image: time-based-routine
